@@ -59,12 +59,12 @@ col1, col2 = st.columns(2)
 with col1:
     age = st.number_input("Age", min_value=18, max_value=70)
     gender = st.selectbox("Gender", ["Male", "Female"])
-    muh = st.number_input("Monthly Usage Hours", min_value=5. ,max_value = 200)
+    muh = st.number_input("Monthly Usage Hours", min_value=5, max_value=200)
 
 with col2:
     num_trans = st.number_input("Number of Transactions", min_value=1, max_value=50)
     sub_type = st.selectbox("Subscription Type", ["Basic", "Premium", "Gold"])
-    complaints = st.number_input("Number of Complaints", min_value=0, max_value = 10)
+    complaints = st.number_input("Number of Complaints", min_value=0, max_value=10)
 
 # Prediction Logic
 if st.button("Predict Churn"):
