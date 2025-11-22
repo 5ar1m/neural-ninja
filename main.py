@@ -1,68 +1,78 @@
 import streamlit as st
-import time
+import pandas as pd
+import numpy as np
+import joblib
 
-# 1. Page Configuration
-st.set_page_config(page_title="Customer Churn Prediction", layout="centered")
+# LOAD MODEL, SCALER, AND COLUMNS
+model = joblib.load("best_model.joblib")       
+scaler = joblib.load("scaler.joblib")          
+columns = joblib.load("columns.joblib")
 
-# 2. Title
-st.markdown("<h1 style='text-align: center;'>Customer Churn Prediction</h1>", unsafe_allow_html=True)
-st.write("---")
+# PREPROCESSING FUNCTION (MUST MATCH TRAINING EXACTLY)
+def preprocess_input(df):
 
-# 3. Row 1: Age and Gender
-col1, col2 = st.columns(2)
+    # 1. Fill NA same as training
+    df["Age"] = df["Age"].fillna(df["Age"].mean())
+    df["Gender"] = df["Gender"].fillna(df["Gender"].mode()[0])
+    df["MonthlyUsageHours"] = df["MonthlyUsageHours"].fillna(df["MonthlyUsageHours"].mean())
+    df["NumTransactions"] = df["NumTransactions"].fillna(df["NumTransactions"].mean())
+    df["SubscriptionType"] = df["SubscriptionType"].fillna(df["SubscriptionType"].mode()[0])
+    df["Complaints"] = df["Complaints"].fillna(df["Complaints"].median())
 
-with col1:
-    # Constraint: Age between 18 and 70
-    age = st.number_input("Age:", min_value=18, max_value=70, step=1)
+    # 2. One-hot encode Gender (same as training)
+    df = pd.get_dummies(df, columns=["Gender"], drop_first=True)
 
-with col2:
-    # Constraint: Male and Female options
-    gender = st.selectbox("Gender:", ["Male", "Female"])
+    # If Gender_Male missing (when user selects Female)
+    if "Gender_Male" not in df.columns:
+        df["Gender_Male"] = 0
 
-# 4. Row 2: Monthly Usage
-# Constraint: Between 5 and 200
-usage = st.number_input("Monthly Usage (in hours):", min_value=5, max_value=200, step=1)
+    # 3. Label encoding SubscriptionType
+    label_map = {"Basic": 1, "Premium": 2, "Gold": 3}
+    df["SubscriptionType"] = df["SubscriptionType"].map(label_map)
 
-# 5. Row 3: Number of Transactions
-# Constraint: Between 1 and 50
-transactions = st.number_input("Number of Transactions:", min_value=1, max_value=50, step=1)
+    # 4. REORDER EXACT COLUMNS
+    df = df.reindex(columns=columns, fill_value=0)
 
-# 6. Row 4: Subscription Type and Complaints
-col3, col4 = st.columns(2)
+    # 5. DO NOT USE df.transform()
+    # Correct: use the saved StandardScaler
+    df_scaled = scaler.transform(df)
 
-with col3:
-    # Constraint: Basic/Premium/Gold
-    subscription = st.selectbox("Subscription Type:", ["Basic", "Premium", "Gold"])
+    return df_scaled
 
-with col4:
-    # Constraint: Between 0 and 10
-    complaints = st.number_input("Complaints:", min_value=0, max_value=10, step=1)
+# STREAMLIT UI
+st.title("Customer Churn Prediction App")
+st.write("Enter customer details to predict probability of churn.")
 
-# Spacing
-st.write("")
-st.write("")
+# Input fields
+age = st.number_input("Age", min_value=1, max_value=100, value=30)
+gender = st.selectbox("Gender", ["Male", "Female"])
+muh = st.number_input("Monthly Usage Hours", min_value=0.0, value=50.0)
+num_trans = st.number_input("Number of Transactions", min_value=0.0, value=10.0)
+sub_type = st.selectbox("Subscription Type", ["Basic", "Premium", "Gold"])
+complaints = st.number_input("Number of Complaints", min_value=0.0, value=2.0)
 
-# 7. Button (Centered)
-# We use columns to center the button visually
-_, col_btn, _ = st.columns([0.35, 0.3, 0.35])
+# Button
+if st.button("Predict Churn"):
 
-with col_btn:
-    predict_btn = st.button("Predict Churn", use_container_width=True)
+    # Create DataFrame
+    input_df = pd.DataFrame([{
+        "Age": age,
+        "Gender": gender,
+        "MonthlyUsageHours": muh,
+        "NumTransactions": num_trans,
+        "SubscriptionType": sub_type,
+        "Complaints": complaints
+    }])
 
-# 8. Mock Prediction Logic
-if predict_btn:
-    with st.spinner("Analyzing customer data..."):
-        time.sleep(1) # Simulating processing time
-        
-        # Since we don't have a real model, we'll just print the inputs for now
-        st.success("Prediction Complete!")
-        
-        # Display what was captured (For debugging/verification)
-        st.json({
-            "Age": age,
-            "Gender": gender,
-            "Monthly Usage": usage,
-            "Transactions": transactions,
-            "Subscription": subscription,
-            "Complaints": complaints
-        })
+    # Preprocess
+    processed = preprocess_input(input_df)
+
+    # Predict
+    pred = model.predict(processed)[0]
+    prob = model.predict_proba(processed)[0][1]
+
+    # Output
+    if pred == 1:
+        st.error(f" Customer Likely to Churn (Probability = {prob:.2f})")
+    else:
+        st.success(f" Customer Not Likely to Churn (Probability = {prob:.2f})")
