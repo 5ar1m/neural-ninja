@@ -19,6 +19,20 @@ This project aims to design, build, evaluate, and deploy a machine learning mode
 
 ---
 
+## 1. Project Overview
+
+Customer churn prediction helps businesses identify customers at risk of leaving. By detecting churn early, companies can take proactive actions to retain customers, reduce losses, and improve long-term profitability.
+
+**Problem Statement:** Build a machine learning prediction model to:
+
+- Predict customer churn.
+- Handle imbalanced dataset.
+- Use proper evaluation metrics such as Accuracy, Precision, Recall, F1-score.
+- Interpret Confusion Matrix and ROC-AUC curve.
+- Deploy the model using a simple user interface.
+
+---
+
 # Customer_Churn_Prediction_ML_Project
 
 Customer Churn Prediction ML Project to implement a full **MLOps workflow**, from data collection to deployment, focused on identifying high-risk customers for proactive retention efforts.
@@ -98,7 +112,18 @@ The dataset consists of **1,000 tuples** and simulates customer data based on th
 ![Project Architecture / Design](https://github.com/officialamit558/neural-ninja/blob/main/images/5.jpg)
 ![Project Architecture / Design](https://github.com/officialamit558/neural-ninja/blob/main/images/2.jpg)
 
+---
 
+## 5. Evaluation Summary
+
+| Metric             | Result                    |
+| ------------------ | ------------------------- |
+| Accuracy           | 0.8968481375358166        |        |
+| Precision          | 0.8833333333333333        |
+| Recall             | 0.9137931034482759        | 
+| F1 Score           |  0.8983050847457628       | 
+
+---
 
 The workflow includes iterative model training and evaluation using various classification approaches:
 
@@ -135,6 +160,32 @@ xgboost
 ### Model Serialization (for saving/loading the trained model)
 joblib
 
-### Deployment 
-streamlit
+---
+
+## 7. Deployment (Streamlit)
+
+Key features:
+
+- Sidebar navigation
+- Dataset preview
+- User input fields
+- Churn prediction output
+- Model summary & explanation
+
+Run the app:
+
+```
+streamlit run app.py
+```
+
+---
+
+## 8. Conclusion
+
+This project demonstrates the complete end‑to‑end lifecycle of a machine learning system for predicting customer churn, including dataset creation, preprocessing, feature engineering, model training, evaluation, deployment, and monitoring.
+
+It follows a practical and industry‑level workflow that can be used in interviews or real‑world ML projects.
+
+---
+
 
