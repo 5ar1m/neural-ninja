@@ -5,6 +5,7 @@
 3) Mahima Dixit
 4) Gaurav Singh
 
+## System Architecture
 ![Project Architecture / Design](https://github.com/officialamit558/neural-ninja/blob/main/images/pro_design.png)
 
 
